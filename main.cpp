@@ -23,6 +23,8 @@ int main() {
   std::cout << "message as ascii: " << testMessage << std::endl;
   std::vector<byte> messageBytes = utility.hexStringToBytes(utility.asciiToHex(testMessage));
   std::cout << "message as hex: " << utility.bytesToHexString(messageBytes)<< std::endl;
+  std::vector<byte> messageBytesLittleEndian = utility.alternateEndianness(messageBytes);
+  std::cout << "message as hex little endian :" << utility.bytesToHexString(messageBytesLittleEndian) << std::endl;
 
   return 0;
 }

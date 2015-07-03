@@ -1,6 +1,5 @@
-#include <cstring>
 #include <sstream>
-#include <iostream>
+#include <algorithm>
 #include "ByteUtility.h"
 
 
@@ -39,4 +38,10 @@ std::string ByteUtility::bytesToHexString(const std::vector<byte> bytes) {
   }
 
   return ss.str();
+}
+
+std::vector<byte> ByteUtility::alternateEndianness(const std::vector<byte> bytes) {
+  std::vector<byte> ret(bytes);
+  std::reverse(ret.begin(), ret.end());
+  return ret;
 }
