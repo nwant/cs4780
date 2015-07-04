@@ -57,9 +57,18 @@ int main() {
   cout << test << endl;
   cout << utility.alternateEndianness(test) << endl;
 
-  string byte = "df";
-  //cout << utility.hexToBitset(byte, 2) << endl;
+  cout << "to words: " << endl;
+  vector<word> words = utility.hexToWords(utility.alternateEndianness(test));
+  for (unsigned int i = 0; i < words.size(); i++) {
+    cout << "word " << i << ": " << words.at(i) << endl;
+  }
 
-
+  test += test;
+  cout << "long test: " << test << endl;
+  words = utility.hexToWords(test);
+  vector<block> blocks = utility.wordsToBlocks(words);
+  for (unsigned int i = 0; i < blocks.size(); i++) {
+    cout << "block " << i << ": " << blocks.at(i)[1] << " " << blocks.at(i)[0] << endl;
+  }
   return 0;
 }

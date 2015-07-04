@@ -16,7 +16,7 @@ const int c = (int)ceil(KEY_NUM_BYTES/WORD_SIZE);       // c
 class RC5 {
 public:
   RC5(const string keyhex);
-  //string encrypt(string plaintext);
+  string encrypt(string plaintext);
 private:
   vector<word> _S;
   void generateSubArray(string keyhex);

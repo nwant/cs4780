@@ -53,6 +53,7 @@ string BinaryUtility::hexToBin(const string hexStr) {
       case '6': ret.append("0110"); break;
       case '7': ret.append("0111"); break;
       case '8': ret.append("1000"); break;
+      case '9': ret.append("1001"); break;
       case 'A':
       case 'a': ret.append("1010"); break;
       case 'B':
@@ -82,6 +83,42 @@ string BinaryUtility::binToHex(const string binStr) {
   ss <<  hex << setw(8) << setfill('0') << base10;
 
   return ss.str();
+}
+
+
+vector<word> BinaryUtility::hexToWords(const string hexStr) {
+  vector<word> ret;
+  unsigned int offset = 0;
+  while (offset < hexStr.length()) {
+    string w = "";
+    for (int i = 0; i < 8; i++) {
+      if(offset >= hexStr.length()) {
+        w = "0000" + w;
+      } else {
+        w = hexToBin(hexStr.substr(hexStr.length() - offset - 1, 1)) + w;
+      }
+      offset++;
+    }
+    ret.push_back(word(w));
+  }
+  return ret;
+}
+
+vector<block> BinaryUtility::wordsToBlocks(const vector<word> words) {
+  vector<block> ret;
+  block blk;
+  for(unsigned int i = 0; i < words.size(); i++) {
+    blk.clear();
+    blk.push_back(words.at(i));
+    i++;
+    if(i < words.size()) {
+      blk.push_back(words.at(i));
+    } else {
+      blk.push_back(word(0x0000));
+    }
+    ret.push_back(blk);
+  }
+  return ret;
 }
 
 string BinaryUtility::alternateEndianness(const string hexStr) {
@@ -123,6 +160,6 @@ string BinaryUtility::bitVectorToBin(bitvector vector) {
   return bin;
 }
 
-unsigned int BinaryUtility::toInt(const word word) {
-  return static_cast<unsigned int>(word.to_ulong());
+unsigned int BinaryUtility::toInt(const word w) {
+  return static_cast<unsigned int>(w.to_ulong());
 }

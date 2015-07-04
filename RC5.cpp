@@ -4,6 +4,8 @@ RC5::RC5(const string keyhex) {
   generateSubArray(keyhex);
 }
 
+
+
 void RC5::generateSubArray(string keyhex) {
   BinaryUtility bu = BinaryUtility();
 
@@ -11,7 +13,7 @@ void RC5::generateSubArray(string keyhex) {
   int u = WORD_SIZE;
   word P(0xb7e15163);
   word Q(0x9e3779b9);
-  vector<bitset<32> > S;
+  vector<bitset<WORD_SIZE> > S; // vector is of size t = 2r + 2
 
   S.at(0) = P;
   for (unsigned int i=1; i <= (t-1); i++) {

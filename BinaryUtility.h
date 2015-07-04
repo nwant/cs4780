@@ -15,7 +15,8 @@ typedef bool bit;
 typedef vector<bit> bitvector;
 typedef bitset<BYTE_SIZE> byte;
 typedef bitset<WORD_SIZE> word;
-typedef bitset<BLOCK_SIZE> block;
+typedef vector<word> block;
+//typedef bitset<BLOCK_SIZE> block;
 
 class BinaryUtility {
 public:
@@ -24,10 +25,12 @@ public:
   string asciiToHex(const string aStr);
   string hexToBin(const string hexStr);
   string binToHex(const string binStr);
+  vector<word> hexToWords(const string hexStr);
+  vector<block> wordsToBlocks(const vector<word> words);
   string alternateEndianness(const string hexStr);
   bitvector hexToBitVector(const string hexStr, int vectorSize);
   string bitVectorToBin(bitvector vector);
-  unsigned int toInt(const word word);
+  unsigned int toInt(const word w);
 };
 
 
