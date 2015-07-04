@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.2)
-project(proj1_rc5)
+project(rc5)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -traditional-cpp")
 

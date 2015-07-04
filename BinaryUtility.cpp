@@ -1,9 +1,10 @@
 #include <sstream>
 #include <algorithm>
+#include <iomanip>
 #include "BinaryUtility.h"
 
-bitset<WORD_SIZE> BinaryUtility::add(const bitset<WORD_SIZE> a, const bitset<WORD_SIZE> b, bool &overflow) {
-  bitset<WORD_SIZE> sum;
+word BinaryUtility::add(const word a, const word b, bool &overflow) {
+  word sum;
   overflow = false;
 
   bitset<1> carry(0);
@@ -16,13 +17,13 @@ bitset<WORD_SIZE> BinaryUtility::add(const bitset<WORD_SIZE> a, const bitset<WOR
   return sum;
 }
 
-bitset<WORD_SIZE> BinaryUtility::leftRotate(const bitset<WORD_SIZE> a, const int shift) {
+word BinaryUtility::leftRotate(const word a, const int shift) {
   bitset<WORD_SIZE> ret(a.to_string());
   bitset<WORD_SIZE> toRotate;
 
   for (int i = 0; i < shift; i++) {
-    int pos = a.size() - 1 - i;
-    int newPos = (pos + shift) % a.size();
+    unsigned int pos = a.size() - 1 - i;
+    unsigned int newPos = (pos + shift) % a.size();
     toRotate.set(newPos, a.test(pos));
   }
   ret = ret << shift;
@@ -32,47 +33,96 @@ bitset<WORD_SIZE> BinaryUtility::leftRotate(const bitset<WORD_SIZE> a, const int
 string BinaryUtility::asciiToHex(const string aStr) {
   stringstream ss;
 
-  for (int i = 0; i < aStr.length(); i++) {
+  for (unsigned int i = 0; i < aStr.length(); i++) {
     ss << hex << (int)aStr.at(i);
   }
 
   return ss.str();
 }
 
-vector<byte> BinaryUtility::hexStringToBytes(const string hexStr) {
-  vector<byte> ret;
+string BinaryUtility::hexToBin(const string hexStr) {
+  string ret = "";
+
+  for (int i = 0; i < hexStr.length(); i++) {
+    switch(hexStr[i]) {
+      case '1': ret.append("0001"); break;
+      case '2': ret.append("0010"); break;
+      case '3': ret.append("0011"); break;
+      case '4': ret.append("0100"); break;
+      case '5': ret.append("0101"); break;
+      case '6': ret.append("0110"); break;
+      case '7': ret.append("0111"); break;
+      case '8': ret.append("1000"); break;
+      case 'A':
+      case 'a': ret.append("1010"); break;
+      case 'B':
+      case 'b': ret.append("1011"); break;
+      case 'C':
+      case 'c': ret.append("1100"); break;
+      case 'D':
+      case 'd': ret.append("1101"); break;
+      case 'E':
+      case 'e': ret.append("1110"); break;
+      case 'F':
+      case 'f': ret.append("1111"); break;
+      default: ret.append("0000"); break;
+    }
+  }
+  return ret;
+}
+
+string BinaryUtility::binToHex(const string binStr) {
+  int base10 = 0;
+  for (int i; i < binStr.length(); i++) {
+    base10 *= 2;
+    base10 += binStr[i] == '1' ? 1 : 0;
+  }
+
   stringstream ss;
-  unsigned int buffer;
-  int offset = 0;
+  ss <<  hex << setw(8) << setfill('0') << base10;
+
+  return ss.str();
+}
+
+string BinaryUtility::alternateEndianness(const string hexStr) {
+  string ret;
+  stringstream ss;
+  unsigned int offset = 0;
   while (offset < hexStr.length()) {
     ss.clear();
-    ss << hexStr.substr(offset, 2);
-    ss >> hex >> buffer;
-    ret.push_back(static_cast<byte>(buffer));
+    string byte = hexStr.substr(offset, 2);
+    ret = byte + ret;
     offset += 2;
   }
   return ret;
 }
 
-string BinaryUtility::bytesToHexString(const vector<byte> bytes) {
-  stringstream ss;
-  ss << hex;
-  for (int i = 0; i < bytes.size(); i++) {
-    ss << (int)bytes[i];
+bitvector BinaryUtility::hexToBitVector(const string hexStr, int vectorSize) {
+  string bin = hexToBin(hexStr);
+  bitvector ret;
+  for (unsigned int i = 0; i < vectorSize; i++) {
+    if (i >= bin.length()) {
+      ret.push_back(false);
+    } else {
+      bool bit = bin.at(i) == '1';
+      ret.push_back(bit);
+    }
   }
-  return ss.str();
-}
-
-vector<byte> BinaryUtility::alternateEndianness(const vector<byte> bytes) {
-  vector<byte> ret(bytes);
-  reverse(ret.begin(), ret.end());
   return ret;
 }
 
-bitset<32> BinaryUtility::toWord(const byte byte) {
-  return bitset<32>(byte);
+string BinaryUtility::bitVectorToBin(bitvector vector) {
+  string bin = "";
+  for (unsigned int i = 0; i < vector.size(); i++) {
+    if (vector.at(i)) {
+      bin.append("1");
+    } else {
+      bin.append("0");
+    }
+  }
+  return bin;
 }
 
-int BinaryUtility::toInt(const bitset<32> word) {
-  return static_cast<int>(word.to_ulong());
+unsigned int BinaryUtility::toInt(const word word) {
+  return static_cast<unsigned int>(word.to_ulong());
 }

@@ -4,15 +4,14 @@ RC5::RC5(const string keyhex) {
   generateSubArray(keyhex);
 }
 
-
 void RC5::generateSubArray(string keyhex) {
   BinaryUtility bu = BinaryUtility();
 
   int t = S_SIZE;
   int u = WORD_SIZE;
-  bitset<32> P(0xb7e15163);
-  bitset<32> Q(0x9e3779b9);
-  vector<bitset<32>> S;
+  word P(0xb7e15163);
+  word Q(0x9e3779b9);
+  vector<bitset<32> > S;
 
   S.at(0) = P;
   for (unsigned int i=1; i <= (t-1); i++) {
@@ -21,33 +20,35 @@ void RC5::generateSubArray(string keyhex) {
 
   int b = KEY_NUM_BYTES;
 
-  bitset<32> L [c];
-  vector<byte> keybytes = bu.hexStringToBytes(keyhex);
+  word L [c];
+  string littleEndianKeyHex = bu.alternateEndianness(keyhex);
+  bitvector K = bu.hexToBitVector(littleEndianKeyHex, 64);
   for (int i = (b-1); i >= 0; i--) {
-    L[i/u] = add((L[i/u] << 8), bu.toWord(keybytes.at(i)));
+    L[i/u] = add((L[i/u] << 8), word(static_cast<unsigned long>(K[i])));
   }
 
   unsigned int i = 0;
   unsigned int j = 0;
-  bitset<32> C, D;
-  for(int count; i < max(t,c); i++) {
+  word C, D;
+  for(int count = 0; count < max(t ,c); count++) {
     C = S.at(i) = leftRotate(add(add(S.at(i), C), D), 3);
-    D = L[j] = leftRotate( add(add(L[j], C), D) , toInt((add(C, D))) );
-
+    D = L[j] = leftRotate(add(add(L[j], C), D), toInt((add(C, D))));
+    i = (i + 1) % t;
+    j = (j + 1) % c;
   }
 
   this->_S.swap(S);
 }
 
-bitset<WORD_SIZE> RC5::add(const bitset<32> a, const bitset<32> b) {
+word RC5::add(const word a, const word b) {
   bool overflow;
   return BinaryUtility().add(a, b, overflow);
 }
 
-bitset<32> RC5::leftRotate(const bitset<32> a, const int shift) {
+word RC5::leftRotate(const word a, const int shift) {
   return BinaryUtility().leftRotate(a, shift);
 }
 
-int RC5::toInt(const bitset<32> word) {
+unsigned int RC5::toInt(const word word) {
   return BinaryUtility().toInt(word);
 }
