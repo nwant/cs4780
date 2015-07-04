@@ -2,14 +2,14 @@
 #include <string>
 #include <vector>
 #include "RC5.h"
-#include "ByteUtility.h"
+#include "BinaryUtility.h"
 
 const int P = 0xb7e15163;
 const int Q = 0x9e3779b9;
 
 int main() {
 
-  ByteUtility utility = ByteUtility();
+  BinaryUtility utility = BinaryUtility();
 
   std::string testKey1 = "4847464544434241";
 
@@ -25,6 +25,8 @@ int main() {
   std::cout << "message as hex: " << utility.bytesToHexString(messageBytes)<< std::endl;
   std::vector<byte> messageBytesLittleEndian = utility.alternateEndianness(messageBytes);
   std::cout << "message as hex little endian :" << utility.bytesToHexString(messageBytesLittleEndian) << std::endl;
+
+
 
   return 0;
 }
