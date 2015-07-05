@@ -4,21 +4,25 @@
 #include <vector>
 #include <bitset>
 #include <math.h>
+#include <string>
 #include "BinaryUtility.h"
 using namespace std;
 
-//const int WORD_SIZE                                   // u
+//const int WORD_SIZE                                   // w
+const int WORD_NUM_BYTES = 4;                           // u
 const int KEY_NUM_BYTES = 8;                            // b  -- key size = 64 bytes
 const int ROUNDS = 12;                                  // r
-const int S_SIZE = 2 * ROUNDS + 2;                      // t = 2r + 2
+const int S_SIZE = 26;                      // t = 2r + 2
 const int c = (int)ceil(KEY_NUM_BYTES/WORD_SIZE);       // c
 
 class RC5 {
 public:
+  RC5(){};
   RC5(const string keyhex);
-  string encrypt(string plaintext);
+  string encrypt(const string plaintext);
 private:
-  vector<word> _S;
+  word _S [S_SIZE];
+  string cipher(block blk);
   void generateSubArray(string keyhex);
   word add(const word a, const word b);
   word leftRotate(const word a, const int shift);

@@ -1,8 +1,5 @@
 #include <iostream>
-#include <string>
-#include <vector>
 #include "RC5.h"
-#include "BinaryUtility.h"
 
 const int P = 0xb7e15163;
 const int Q = 0x9e3779b9;
@@ -12,20 +9,6 @@ int main() {
   BinaryUtility utility = BinaryUtility();
 
   string testKey1 = "4847464544434241";
-  //string testKey1 = "ab";
-
-//  cout << "key input: " << testKey1 << endl;
-//  vector<byte> keyBytes = utility.hexStringToBytes(testKey1);
-//  cout << "key output: " << utility.bytesToHexString(keyBytes) << endl;
-//
-//
-//  string testMessage = "abcdefghijklmnopqrstuvwxyzabcdef";
-//
-//  cout << "message as ascii: " << testMessage << endl;
-//  vector<byte> messageBytes = utility.hexStringToBytes(utility.asciiToHex(testMessage));
-//  cout << "message as hex: " << utility.bytesToHexString(messageBytes)<< endl;
-//  vector<byte> messageBytesLittleEndian = utility.alternateEndianness(messageBytes);
-//  cout << "message as hex little endian :" << utility.bytesToHexString(messageBytesLittleEndian) << std::endl;
 
   cout << "test key: " << testKey1 << endl;
   cout << "test key to binary: " << endl;
@@ -70,5 +53,31 @@ int main() {
   for (unsigned int i = 0; i < blocks.size(); i++) {
     cout << "block " << i << ": " << blocks.at(i)[1] << " " << blocks.at(i)[0] << endl;
   }
+
+  string key = "4847464544434241";
+  cout << "Key: " << key << endl;
+  string input = "abcdefghijklmnopqrstuvwxyzabcdef";
+  cout << "Input: " << input << endl;
+
+  RC5 rc5 = RC5(key);
+  string ciphertext = rc5.encrypt(input);
+  cout << "Encryptions: " << endl;
+
+  vector<word> ctWords = utility.hexToWords(utility.asciiToHex(ciphertext));
+  vector<block> ctBlocks = utility.wordsToBlocks(ctWords);
+  for (unsigned int i = 0; i < ctBlocks.size(); i++) {
+    cout << "Block " << i << ": " << utility.binToHex(ctBlocks.at(i)[0].to_string()) << " ";
+    cout << utility.binToHex(ctBlocks.at(i)[1].to_string()) << endl;
+  }
+
+  cout << endl << "Decryptions: " << endl;
+  vector<word> ptWords = utility.hexToWords(utility.asciiToHex(ciphertext));
+  vector<block> ptBlocks = utility.wordsToBlocks(ctWords);
+  for (unsigned int i = 0; i < ptBlocks.size(); i++) {
+    cout << "Block " << i << ": " << utility.binToHex(ptBlocks.at(i)[0].to_string()) << " ";
+    cout << utility.binToHex(ptBlocks.at(i)[1].to_string()) << endl;
+  }
+
+
   return 0;
 }

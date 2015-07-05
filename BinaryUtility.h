@@ -7,16 +7,15 @@
 using namespace std;
 
 const unsigned int BYTE_SIZE = 8;
-const unsigned int WORD_SIZE = BYTE_SIZE * 4;
-const unsigned int BLOCK_SIZE = WORD_SIZE * 2;
+const unsigned int WORD_SIZE = BYTE_SIZE * 4;   // 32
+const unsigned int BLOCK_SIZE = WORD_SIZE * 2;  // 64
 
 //typedef unsigned char byte;
 typedef bool bit;
 typedef vector<bit> bitvector;
 typedef bitset<BYTE_SIZE> byte;
 typedef bitset<WORD_SIZE> word;
-typedef vector<word> block;
-//typedef bitset<BLOCK_SIZE> block;
+typedef vector<word> block;     // of size: BLOCK_SIZE = 2 * WORD_SIZE = 64
 
 class BinaryUtility {
 public:
