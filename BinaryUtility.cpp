@@ -13,20 +13,21 @@ word BinaryUtility::add(const word a, const word b, bool &overflow) {
     carry[0] = ((a[i] & b[i]) | (a[i] & carry[0])) | (b[i] & carry[0]);
   }
 
-  overflow = carry[0];
   return sum;
 }
 
-word BinaryUtility::leftRotate(const word a, const int shift) {
+word BinaryUtility::leftRotate(const word a, const unsigned long shift) {
   bitset<WORD_SIZE> ret(a.to_string());
   bitset<WORD_SIZE> toRotate;
 
-  for (int i = 0; i < shift; i++) {
-    unsigned int pos = a.size() - 1 - i;
-    unsigned int newPos = (pos + shift) % a.size();
+  unsigned long modShift = shift % WORD_SIZE;
+
+  for (int i = 0; i < modShift; i++) {
+    unsigned long pos = a.size() - 1 - i;
+    unsigned long newPos = (pos + modShift) % a.size();
     toRotate.set(newPos, a.test(pos));
   }
-  ret = ret << shift;
+  ret = ret << modShift;
   return ret | toRotate;
 }
 
@@ -83,6 +84,26 @@ string BinaryUtility::binToHex(const string binStr) {
   ss <<  hex << setw(8) << setfill('0') << base10;
 
   return ss.str();
+}
+
+vector<byte> BinaryUtility::hexToBytes(const string hexStr) {
+  vector<byte> ret;
+  bool padLastHex = (hexStr.length() % 2) != 0;
+  unsigned int lastHexPos = hexStr.length() - 1;
+  int offset = hexStr.length() - 1;
+  while (offset >= 0) {
+  //for (unsigned int i = 0; i < hexStr.length(); i++) {
+    string b = hexToBin(hexStr.substr(offset, 1));
+    offset--;
+    if (offset == lastHexPos && padLastHex) {
+      b = "0000" + b;
+    } else {
+      b = hexToBin(hexStr.substr(offset, 1)) + b;
+    }
+    offset--;
+    ret.push_back(byte(b));
+  }
+  return ret;
 }
 
 
@@ -160,6 +181,10 @@ string BinaryUtility::bitVectorToBin(bitvector vector) {
   return bin;
 }
 
-unsigned int BinaryUtility::toInt(const word w) {
-  return static_cast<unsigned int>(w.to_ulong());
+unsigned long BinaryUtility::toULong(const word w) {
+  return w.to_ulong();
+}
+
+word BinaryUtility::clone(const word w) {
+  return word(w.to_string());
 }

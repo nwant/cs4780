@@ -20,16 +20,18 @@ typedef vector<word> block;     // of size: BLOCK_SIZE = 2 * WORD_SIZE = 64
 class BinaryUtility {
 public:
   word add(const word a, const word b, bool & overflow);
-  word leftRotate(const word a, const int shift);
+  word leftRotate(const word a, const unsigned long shift);
   string asciiToHex(const string aStr);
   string hexToBin(const string hexStr);
   string binToHex(const string binStr);
+  vector<byte> hexToBytes(const string hexStr);
   vector<word> hexToWords(const string hexStr);
   vector<block> wordsToBlocks(const vector<word> words);
   string alternateEndianness(const string hexStr);
   bitvector hexToBitVector(const string hexStr, int vectorSize);
   string bitVectorToBin(bitvector vector);
-  unsigned int toInt(const word w);
+  word clone(const word w);
+  unsigned long toULong(const word w);
 };
 
 
