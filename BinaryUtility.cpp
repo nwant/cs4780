@@ -1,6 +1,7 @@
 #include <sstream>
 #include <algorithm>
 #include <iomanip>
+#include <iostream>
 #include "BinaryUtility.h"
 
 word BinaryUtility::add(const word a, const word b, bool &overflow) {
@@ -17,9 +18,11 @@ word BinaryUtility::add(const word a, const word b, bool &overflow) {
 }
 
 word BinaryUtility::leftRotate(const word a, const unsigned long shift) {
+  //cout << "in leftRotate" << endl;
   bitset<WORD_SIZE> ret(a.to_string());
   bitset<WORD_SIZE> toRotate;
 
+  //cout << "before rotation: " << a.to_string() << endl;
   unsigned long modShift = shift % WORD_SIZE;
 
   for (int i = 0; i < modShift; i++) {
@@ -28,6 +31,8 @@ word BinaryUtility::leftRotate(const word a, const unsigned long shift) {
     toRotate.set(newPos, a.test(pos));
   }
   ret = ret << modShift;
+  //cout << "exiting leftRotate";
+  //cout << "after rotation: " << (ret | toRotate).to_string() << endl;
   return ret | toRotate;
 }
 
@@ -75,15 +80,15 @@ string BinaryUtility::hexToBin(const string hexStr) {
 
 string BinaryUtility::binToHex(const string binStr) {
   int base10 = 0;
-  for (int i; i < binStr.length(); i++) {
+  for (unsigned int i = 0; i < binStr.length(); i++) {
     base10 *= 2;
     base10 += binStr[i] == '1' ? 1 : 0;
   }
 
   stringstream ss;
   ss <<  hex << setw(8) << setfill('0') << base10;
-
-  return ss.str();
+  string hex(ss.str());
+  return hex;
 }
 
 vector<byte> BinaryUtility::hexToBytes(const string hexStr) {
@@ -92,7 +97,6 @@ vector<byte> BinaryUtility::hexToBytes(const string hexStr) {
   unsigned int lastHexPos = hexStr.length() - 1;
   int offset = hexStr.length() - 1;
   while (offset >= 0) {
-  //for (unsigned int i = 0; i < hexStr.length(); i++) {
     string b = hexToBin(hexStr.substr(offset, 1));
     offset--;
     if (offset == lastHexPos && padLastHex) {
@@ -110,6 +114,7 @@ vector<byte> BinaryUtility::hexToBytes(const string hexStr) {
 vector<word> BinaryUtility::hexToWords(const string hexStr) {
   vector<word> ret;
   unsigned int offset = 0;
+  word newWord;
   while (offset < hexStr.length()) {
     string w = "";
     for (int i = 0; i < 8; i++) {
@@ -120,8 +125,15 @@ vector<word> BinaryUtility::hexToWords(const string hexStr) {
       }
       offset++;
     }
-    ret.push_back(word(w));
+    clone(newWord, word(w));
+    //cout << "pushing " << binToHex(newWord.to_string()) << endl;
+    ret.push_back(newWord);
   }
+//  for(int i = 0; i < ret.size(); i++) {
+//    cout << "return word " << i << ": " << binToHex((ret.at(i).to_string()));
+//    cout <<  " base2:" << ret[i].to_string() << endl;
+//  }
+
   return ret;
 }
 
@@ -185,6 +197,12 @@ unsigned long BinaryUtility::toULong(const word w) {
   return w.to_ulong();
 }
 
-word BinaryUtility::clone(const word w) {
-  return word(w.to_string());
+void BinaryUtility::clone(word & dest, const word src) {
+  for (unsigned int i = 0; i < src.size(); i++) {
+    if (src.test(i)) {
+      dest.set(i, 1);
+    } else {
+      dest.set(i, 0);
+    }
+  }
 }

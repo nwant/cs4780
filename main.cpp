@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 #include "RC5.h"
+#include "BinaryUtility.h"
 
 
 int main() {
@@ -57,29 +58,31 @@ int main() {
 //    cout << "block " << i << ": " << blocks.at(i)[1] << " " << blocks.at(i)[0] << endl;
 //  }
 
+  BinaryUtility utility = BinaryUtility();
+
   string key = "4847464544434241";
   cout << "Key: " << key << endl;
   string input = "abcdefghijklmnopqrstuvwxyzabcdef";
-  cout << "Input: " << input << endl;
+  cout << "Input: " << input << endl << endl;
 
     RC5 rc5 = RC5(key);
-//  string ciphertext = rc5.encrypt(input);
-//  cout << "Encryptions: " << endl;
-//
-//  vector<word> ctWords = utility.hexToWords(utility.asciiToHex(ciphertext));
-//  vector<block> ctBlocks = utility.wordsToBlocks(ctWords);
-//  for (unsigned int i = 0; i < ctBlocks.size(); i++) {
-//    cout << "Block " << i << ": " << utility.binToHex(ctBlocks.at(i)[0].to_string()) << " ";
-//    cout << utility.binToHex(ctBlocks.at(i)[1].to_string()) << endl;
-//  }
-//
-//  cout << endl << "Decryptions: " << endl;
-//  vector<word> ptWords = utility.hexToWords(utility.asciiToHex(ciphertext));
-//  vector<block> ptBlocks = utility.wordsToBlocks(ptWords);
-//  for (unsigned int i = 0; i < ptBlocks.size(); i++) {
-//    cout << "Block " << i << ": " << utility.binToHex(ptBlocks.at(i)[0].to_string()) << " ";
-//    cout << utility.binToHex(ptBlocks.at(i)[1].to_string()) << endl;
-//  }
+  string ciphertext = rc5.encrypt(input);
+  //cout << "Encryptions: " << endl;
+
+  vector<word> ctWords = utility.hexToWords(utility.asciiToHex(ciphertext));
+  vector<block> ctBlocks = utility.wordsToBlocks(ctWords);
+  for (unsigned int i = 0; i < ctBlocks.size(); i++) {
+    //cout << "Block " << i << ": " << utility.binToHex(ctBlocks.at(i)[0].to_string()) << " ";
+    //cout << utility.binToHex(ctBlocks.at(i)[1].to_string()) << endl;
+  }
+
+  //cout << endl << "Decryptions: " << endl;
+  vector<word> ptWords = utility.hexToWords(utility.asciiToHex(ciphertext));
+  vector<block> ptBlocks = utility.wordsToBlocks(ptWords);
+  for (unsigned int i = 0; i < ptBlocks.size(); i++) {
+    //cout << "Block " << i << ": " << utility.binToHex(ptBlocks.at(i)[0].to_string()) << " ";
+    //cout << utility.binToHex(ptBlocks.at(i)[1].to_string()) << endl;
+  }
 
 
   return 0;

@@ -30,8 +30,9 @@ public:
   string alternateEndianness(const string hexStr);
   bitvector hexToBitVector(const string hexStr, int vectorSize);
   string bitVectorToBin(bitvector vector);
-  word clone(const word w);
+  void clone(word & dest, const word src);
   unsigned long toULong(const word w);
+
 };
 
 

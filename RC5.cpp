@@ -1,7 +1,7 @@
 #include <sstream>
 #include <algorithm>
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 #include "RC5.h"
 
 RC5::RC5(const string keyhex) {
@@ -12,32 +12,55 @@ string RC5::encrypt(const string plaintext) {
   BinaryUtility bu = BinaryUtility();
   stringstream ss;
   string pt(plaintext);
+
+  //cout << "Plaintext" << plaintext << endl;
   // convert to little endian hex
   pt = bu.asciiToHex(pt);
+
+  //cout << "Plaintext in hex: " << pt << endl;
   pt = bu.alternateEndianness(pt);
+  //cout << "Plaintext in hex, little endian : " << pt << endl;
+
+  vector<word> ptWords = bu.hexToWords(pt);
+  for (int i = 0; i < ptWords.size(); i++) {
+    cout << "plaintest word " << i << ": " << bu.binToHex(ptWords[i].to_string()) << endl;
+  }
+  cout << endl;
 
   // break into blocks and encrypt each block
   vector<block> ptBlocks = bu.wordsToBlocks(bu.hexToWords(pt));
+
+  cout << endl;
+
   for (unsigned int i = 0; i < ptBlocks.size(); i++) {
+    cout << "plaintext block " << i << ": " << bu.binToHex(ptBlocks[i][0].to_string()) << " " << bu.binToHex(ptBlocks[i][1].to_string()) << endl;
     ss << cipher(ptBlocks.at(i));
+    cout << "ciphertext block " << i << ": " << cipher(ptBlocks.at(i)) << endl;
   }
 
   return ss.str();
 }
 
 string RC5::cipher(block blk) {
-  word A = blk.at(0);
-  word B = blk.at(1);
-  int r = ROUNDS;
+  word A, B;
+  //cout << "entering cipher" << endl;
+  //cout << "Before encryption: " << endl;
+  //cout << "A: " << BinaryUtility().binToHex(blk.at(0).to_string()) << endl;
+  //cout << "B: " << BinaryUtility().binToHex(blk.at(1).to_string()) << endl << endl;
+  clone(A, blk.at(0));
+  clone(B, blk.at(1));
 
-  A = add(A, _S[0]);
-  B = add(B, _S[1]);
-  for(unsigned int i = 0; i < r; i++) {
-    A = add(leftRotate((A ^ B), toULong(B)), _S[2*i]);
-    B = add(leftRotate(B ^ A, toULong(A)), _S[(2*i)+1]);
+  clone(A, add(A, _S[0]));
+  clone(B, add(B, _S[1]));
+  for(unsigned int i = 1; i <= ROUNDS; i++) {
+    clone(A, add(leftRotate((A ^ B), toULong(B)), _S[2*i]));
+    clone(B, add(leftRotate((B ^ A), toULong(A)), _S[(2*i)+1]));
   }
-  string ciphertext = B.to_string() + A.to_string();
-  return ciphertext;
+  //cout << "After encryption: " << endl;
+  //cout << "A: " << BinaryUtility().binToHex(A.to_string()) << endl;
+  //cout << "B: " << BinaryUtility().binToHex(B.to_string()) << endl << endl;
+  //cout << "leaving cipher" << endl;
+  return BinaryUtility().binToHex(B.to_string()) + BinaryUtility().binToHex(A.to_string());
 }
 
 void RC5::generateSubArray(string keyhex) {
@@ -47,23 +70,36 @@ void RC5::generateSubArray(string keyhex) {
   word P(0xb7e15163);
   word Q(0x9e3779b9);
 
-//  // initialize S
-//  for (unsigned int i = 0; i < S_SIZE; i++) {
-//   _S[i].reset();
-//  }
 
+  // initialize S Array
   _S.push_back(P);   // S[0] = P
+  //cout << "S[0]: " << bu.binToHex(_S[0].to_string()) << endl;
   for (unsigned int i=1; i <= (S_SIZE-1) ; i++) {
-    _S.push_back(add(_S[i - 1], Q));   // S[i] = S[i-1] + Q
-  }
-//
+    word newWord;
+    clone(newWord, add(_S[i-1], Q));
+    _S.push_back(newWord);   // S[i] = S[i-1] + Q
+//    cout << "S[" << i << "]: " << bu.binToHex(newWord.to_string()) << endl;
+}
+  //cout << endl;
+
+//  for (unsigned int i=0; i< S_SIZE; i++) {
+//    cout << "S[" << i << "]: "  << bu.binToHex(_S.at(i).to_string()) << endl;
+//  }
+//  cout << endl;
+
   // initialize L
   word L [KEY_WORDS];
-  //word L [2];
   for (unsigned int i = 0; i < KEY_WORDS; i++) {
-    L[i] = word(0x0000);
+    word nullWord = word(0x0000);
+    clone(L[i], nullWord);
   }
-//
+
+//  for (unsigned int i = 0; i < KEY_WORDS; i++) {
+//    cout << "L[" << i << "]: " << bu.binToHex(L[i].to_string()) << endl;
+//  }
+
+
+  // generate L array:
   // Copy K into L in little-endian order.
   vector<byte> K = bu.hexToBytes(keyhex);
   for (int i = (KEY_BYTES-1); i >= 0; i--) {
@@ -74,32 +110,44 @@ void RC5::generateSubArray(string keyhex) {
   // K    : 7 [ K7 | K6 | K5 | K4 | K3 | K2 | K1 | K0 ] 0
   // L[1] : 3 [ K7 | K6 | K5 | K4 ] 0
   // L[0] : 3 [ K3 | K2 | K1 | K0 ] 0
-//
+
+//  for (unsigned int i = 0; i < KEY_BYTES; i++) {
+//    cout << "K[" << i << "]: " << bu.binToHex(K[i].to_string()) << endl;
+//  }
+//  cout << endl;
+//  for (unsigned int i = 0; i < KEY_WORDS; i++) {
+//    cout << "L[" << i << "]: " << bu.binToHex(L[i].to_string()) << endl;
+//  }
+//  cout << endl;
+
+  // generate S array based on key
   unsigned int i = 0;
   unsigned int j = 0;
   word C;
   word D;
-  int count = 3 * max(S_SIZE, KEY_WORDS);
+  int count = 3 * max(26, KEY_WORDS);
   C.reset();
   D.reset();
   while(count >= 0) {
 
-//    cout << "Count: "  << count << endl;
-//    cout << "C: " << endl << C << endl;
-//    cout << "D: " << endl << D << endl;
-//    cout << "i: " << i << endl;
-//    cout << "j: " << j << endl;
-//    cout << "S[" << i << "] : " << endl << _S[i].to_string() << endl;
-//    cout << "S[" << i << "] + C: " << endl <<  add(_S[i], C) << endl;
-//    cout << "S[" << i << "] + C + D: " << endl << add(add(_S[i], C), D) << endl;
-//    cout << "(S[" << i << "] + C + D) <- 3: " << endl << leftRotate(add(add(_S[i], C), D), 3) << endl << endl;
-//    cout << "L[" << j << "] : " << endl << L[j].to_string() << endl;
-//    cout << "L[" << j << "] + C: " << endl << add(L[j], C) << endl;
-//    cout << "L[" << j << "] + C + D: " << endl << add(add(L[j], C), D) << endl;
-//    cout << "C + D : " << endl << toULong(add(C, D)) << endl;
-//    cout << "(L[" << j << "] + C + D) <- (C + D): " << endl << leftRotate(add(add(L[j], C), D), toULong((add(C, D)))) << endl;
-//    cout << "S[" << i << "]: " << _S[i].to_string() << endl;
-//    cout << "L[" << j << "]: " << L[j].to_string() << endl;
+    cout << "Count: "  << (78 - count) << endl;
+    cout << "C: " <<  bu.binToHex(C.to_string()) << endl;
+    cout << "D: " <<  bu.binToHex(D.to_string()) << endl;
+    cout << "i: " << i << endl;
+    cout << "j: " << j << endl;
+    cout << "S[" << i << "] : "  << bu.binToHex(_S[i].to_string()) << endl << endl;
+    cout << "S[" << i << "] + C: "  <<  bu.binToHex(add(_S[i], C).to_string()) << endl << endl;
+    cout << "S[" << i << "] + C + D: "  << bu.binToHex(add(add(_S[i], C), D).to_string()) << endl << endl;
+    cout << "(S[" << i << "] + C + D) <- 3: "  << bu.binToHex(leftRotate(add(add(_S[i], C), D), 3).to_string());
+    cout << " **(should be new S[" << i << "]: " << endl << endl;
+    cout << "L[" << j << "] : "  << bu.binToHex(L[j].to_string()) << endl << endl;
+    cout << "L[" << j << "] + C: " << bu.binToHex(add(L[j], C).to_string()) << endl << endl;
+    cout << "L[" << j << "] + C + D: "  << bu.binToHex(add(add(L[j], C), D).to_string()) << endl << endl;
+    cout << "C + D : "  << toULong(add(C, D)) << endl << endl;
+    cout << "(L[" << j << "] + C + D) <- (C + D): "  << bu.binToHex(leftRotate(add(add(L[j], C), D), toULong((add(C, D)))).to_string());
+    cout << "  **(should be new L[" << j << "]: " << endl << endl;
+    //cout << "S[" << i << "]: " << bu.binToHex(_S[i].to_string()) << endl << endl;
+    //cout << "L[" << j << "]: " << bu.binToHex(L[j].to_string()) << endl << endl << endl;
 
     //_S[i] = leftRotate(add(add(_S[i], C), D), 3);
     //L[j] = leftRotate(add(add(L[j], C), D), toULong(add(C, D)));
@@ -108,18 +156,22 @@ void RC5::generateSubArray(string keyhex) {
     clone(C, _S[i]);
     clone(D, L[j]);
 
-//    cout << "C = S[" << i << "] --> D: " << C << endl;
-//    cout << "D = L[" << j << "] --> D: " << D << endl;
-//    cout << "(" << i << " + 1) % " << S_SIZE << ": "  << (i + 1) % S_SIZE << endl;
-//    cout << "(" << j << " + 1) % " << KEY_WORDS << ": " << (j + 1) % KEY_WORDS << endl << endl;
-//
-//    i = (i + 1) % S_SIZE;
-//    j = (j + 1) % KEY_WORDS;
-//
-//    cout << "--------------------------------------------------------------" << endl;
+    cout << "after calulation" << endl;
+    cout << "C = S[" << i << "] --> D: " << bu.binToHex(C.to_string()) << endl;
+    cout << "D = L[" << j << "] --> D: " << bu.binToHex(D.to_string()) << endl;
+    cout << "(" << i << " + 1) % " << S_SIZE << ": "  << (i + 1) % S_SIZE << endl;
+    cout << "(" << j << " + 1) % " << KEY_WORDS << ": " << (j + 1) % KEY_WORDS << endl << endl;
+
+    i = (i + 1) % S_SIZE;
+    j = (j + 1) % KEY_WORDS;
+
+    //cout << "--------------------------------------------------------------" << endl;
 
     count--;
+
   };
+
+
 }
 
 word RC5::add(const word a, const word b) {
@@ -136,13 +188,7 @@ unsigned long RC5::toULong(const word word) {
 }
 
 void RC5::clone(word & dest, const word src) {
-  for (unsigned int i = 0; i < src.size(); i++) {
-    if(src.test(i)) {
-      dest.set(i, 1);
-    } else {
-      dest.set(i, 0);
-    }
-  }
+  return BinaryUtility().clone(dest, src);
 }
 
 
